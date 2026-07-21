@@ -1,31 +1,19 @@
-print("AI Desktop Assistant setup successful!")
+"""
+Application Entry Point
+"""
 
-import logging
+from app.audio.listener import Listener
 
-from assistant.listener import Listener
-from assistant.speaker import Speaker
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s",
-)
+def main():
 
-speaker = Speaker()
-listener = Listener()
+    listener = Listener()
 
-speaker.speak("Hello! I am AIDA.")
+    audio = listener.listen(duration=5)
 
-while True:
+    print(type(audio))
+    print(audio.shape)
 
-    text = listener.listen()
 
-    if text is None:
-        continue
-
-    print(f"\nYou : {text}")
-
-    speaker.speak(f"You said {text}")
-
-    if text.lower() == "exit":
-        speaker.speak("Goodbye.")
-        break
+if __name__ == "__main__":
+    main()
