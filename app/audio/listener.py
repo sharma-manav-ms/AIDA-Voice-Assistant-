@@ -1,79 +1,47 @@
 """
-Microphone Listener
-
-Responsibility:
-- Open microphone
-- Record raw audio
-- Return PCM bytes
-
-This module DOES NOT:
-- Recognize speech
-- Detect voice
-- Call AI
+Microphone Stream
 """
 
 from __future__ import annotations
 
 import sounddevice as sd
-from typing import Optional
+from queue import Queue
 
 from app.config.settings import (
     SAMPLE_RATE,
     CHANNELS,
-    DEVICE_INDEX,
+    CHUNK_SIZE,
 )
 
 from app.utils.logger import get_logger
-
 
 logger = get_logger(__name__)
 
 
 class Listener:
-    """
-    Handles microphone recording only.
-    """
 
-    def __init__(
-        self,
-        sample_rate: int = SAMPLE_RATE,
-        channels: int = CHANNELS,
-        device: Optional[int] = DEVICE_INDEX,
-    ) -> None:
+    def __init__(self):
 
-        self.sample_rate = sample_rate
-        self.channels = channels
-        self.device = device
+        self.queue = Queue()
 
-        logger.info("Listener initialized.")
+    def callback(self, indata, frames, time, status):
 
-    def listen(self, duration: float = 5.0):
-        """
-        Record raw microphone audio.
+        if status:
+            logger.warning(status)
 
-        Parameters
-        ----------
-        duration : float
-            Recording duration in seconds.
+        self.queue.put(indata.copy())
 
-        Returns
-        -------
-        numpy.ndarray
-            Raw PCM audio.
-        """
+    def stream(self):
 
-        logger.info("Recording started...")
+        logger.info("Listening...")
 
-        audio = sd.rec(
-            int(duration * self.sample_rate),
-            samplerate=self.sample_rate,
-            channels=self.channels,
-            dtype="int16",
-            device=self.device,
-        )
+        with sd.InputStream(
+            samplerate=SAMPLE_RATE,
+            channels=CHANNELS,
+            blocksize=CHUNK_SIZE,
+            callback=self.callback,
+            dtype="float32",
+        ):
 
-        sd.wait()
-
-        logger.info("Recording finished.")
-
-        return audio
+            while True:
+                yield self.queue.get()

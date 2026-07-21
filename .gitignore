@@ -1,8 +1,41 @@
+# Virtual environment
 .venv/
+venv/
+env/
+
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+
+# Environment / secrets
 .env
+.fernet.key
+
+# IDE
 .history
+.vscode/
+.idea/
+
+# Build / Distribution
 dist/
 build/
 *.spec
+*.egg-info/
+
+# Temp files
+temp_audio.wav
+*.wav
+
+# Memory (database, logs, notes – user-specific)
+app/memory/history.db
+app/memory/logs/
+app/memory/notes/
+app/memory/temp/
+
+# Screenshots
+assets/screenshots/
+
+# OS
+Thumbs.db
+.DS_Store
